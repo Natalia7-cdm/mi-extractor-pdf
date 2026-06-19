@@ -20,10 +20,9 @@ if 'logeado' not in st.session_state:
 # CASO A: SI NO ESTÁ LOGEADO (Muestra el logo GRANDE y CENTRADO en el Login)
 # =========================================================================
 if not st.session_state.logeado:
-    # Columnas invisibles para centrar el logo en el Login
     col_izq, col_centro, col_der = st.columns([1, 6, 1]) 
     with col_centro:
-        st.image("logo.jpg", width=600) # <--- CORREGIDO A .JPG
+        st.image("logo.jpg", width=600)
     st.write("---") 
     
     st.title("🔒 Acceso Restringido")
@@ -43,12 +42,10 @@ if not st.session_state.logeado:
 # CASO B: SI YA INICIÓ SESIÓN (Muestra el logo PEQUEÑO en la ESQUINA DERECHA)
 # =========================================================================
 else:
-    # Creamos dos columnas: una muy ancha para el espacio y una pequeña a la derecha para el logo
     col_espacio, col_logo_derecha = st.columns([4, 1])
     with col_logo_derecha:
-        st.image("logo.jpg", width=120) # <--- CORREGIDO A .JPG
+        st.image("logo.jpg", width=120)
         
-    # Botón para cerrar sesión justo debajo del logo pequeño
     col_vacia, col_salir = st.columns([4, 1])
     with col_salir:
         if st.button("Cerrar Sesión"):
@@ -56,7 +53,6 @@ else:
             st.session_state.procesado = False
             st.session_state.excel_data = None
             
-            # Forzamos un refresco real del navegador para regresar al Login limpio
             st.components.v1.html("""
                 <script>
                     window.parent.location.reload();
@@ -64,7 +60,7 @@ else:
             """, height=0)
             st.stop()
 
-    st.write("---") # Línea divisoria elegante
+    st.write("---")
 
     st.title("Extractor de Extractos Bancarios a Excel 📊")
     st.write("Sube tu archivo PDF y selecciona las páginas que deseas extraer.")
@@ -133,8 +129,21 @@ else:
         if st.session_state.procesado:
             st.success(f"¡Éxito! Se extrajeron {st.session_state.total_filas} transacciones listas para Excel.")
             
+            # Aquí acorté el texto largo para evitar que se rompa al copiarlo
+            tipo_excel = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            
             st.download_button(
                 label="📥 3. Descargar archivo Excel",
                 data=st.session_state.excel_data,
                 file_name=f"Extracto_{start_page}_a_{end_page}.xlsx",
-                mime="application/vnd.openxmlformats
+                mime=tipo_excel
+            )
+            
+            st.write("---")
+            
+            if st.button("🔄 Procesar nuevo archivo / Limpiar pantalla"):
+                st.session_state.procesado = False
+                st.session_state.excel_data = None
+                st.session_state.total_filas = 0
+                st.session_state.uploader_key += 1 
+                st.rerun()
