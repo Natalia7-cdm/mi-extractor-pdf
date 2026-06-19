@@ -22,7 +22,7 @@ if 'logeado' not in st.session_state:
     col_izq, col_centro, col_der = st.columns([1, 2, 1]) # Creamos 3 columnas para centrar
     with col_centro:
         # Cambia "logo.png" por el nombre exacto de tu archivo subido
-        st.image("logo.jpg", width=700) 
+        st.image("logo.jpg", width=900) 
     # -------------------------------------
 
 # Si NO está logeado, mostramos solo la pantalla de inicio de sesión
