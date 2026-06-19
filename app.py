@@ -6,25 +6,26 @@ import re
 
 st.set_page_config(page_title="Extractor de PDF", layout="centered")
 
-# --- EL LOGO SIEMPRE ARRIBA ---
-col_izq, col_centro, col_der = st.columns([1, 6, 1]) 
-with col_centro:
-    st.image("logo.jpg", width=600) 
-st.write("---")
-
-# --- 1. SISTEMA DE LOGIN ---
-# Correos oficiales del equipo. Puedes cambiar "sintesis2026" por sus contraseñas reales.
+# --- 1. CONFIGURACIÓN DE USUARIOS PERMITIDOS ---
 USUARIOS_PERMITIDOS = {
     "karinao@sintesis.com.bo": "acceso123",
-    "nicolf@sintesis.com.bo": "Sintesis123",
-    "manuelm@sintesis.com.bo": "Junio2026"
+    "nicolf@sintesis.com.bo": "sintesis2026",
+    "manuelm@sintesis.com.bo": "sintesis2026"
 }
 
 if 'logeado' not in st.session_state:
     st.session_state.logeado = False
 
-# Si NO está logeado, mostramos solo el formulario
+# =========================================================================
+# CASO A: SI NO ESTÁ LOGEADO (Muestra el logo GRANDE y CENTRADO en el Login)
+# =========================================================================
 if not st.session_state.logeado:
+    # Columnas invisibles para centrar el logo en el Login
+    col_izq, col_centro, col_der = st.columns([1, 6, 1]) 
+    with col_centro:
+        st.image("logo.jpg", width=600) # <--- CORREGIDO A .JPG
+    st.write("---") 
+    
     st.title("🔒 Acceso Restringido")
     st.write("Por favor, inicia sesión con tu correo corporativo.")
     
@@ -38,9 +39,16 @@ if not st.session_state.logeado:
         else:
             st.error("❌ Correo o contraseña incorrectos.")
 
-# --- 2. EL PORTAL (Solo se muestra si el login fue exitoso) ---
+# =========================================================================
+# CASO B: SI YA INICIÓ SESIÓN (Muestra el logo PEQUEÑO en la ESQUINA DERECHA)
+# =========================================================================
 else:
-    # Botón para cerrar sesión en la esquina superior derecha
+    # Creamos dos columnas: una muy ancha para el espacio y una pequeña a la derecha para el logo
+    col_espacio, col_logo_derecha = st.columns([4, 1])
+    with col_logo_derecha:
+        st.image("logo.jpg", width=120) # <--- CORREGIDO A .JPG
+        
+    # Botón para cerrar sesión justo debajo del logo pequeño
     col_vacia, col_salir = st.columns([4, 1])
     with col_salir:
         if st.button("Cerrar Sesión"):
@@ -48,13 +56,15 @@ else:
             st.session_state.procesado = False
             st.session_state.excel_data = None
             
-            # Forzamos un refresco real del navegador para que el logo vuelva a cargar
+            # Forzamos un refresco real del navegador para regresar al Login limpio
             st.components.v1.html("""
                 <script>
                     window.parent.location.reload();
                 </script>
             """, height=0)
             st.stop()
+
+    st.write("---") # Línea divisoria elegante
 
     st.title("Extractor de Extractos Bancarios a Excel 📊")
     st.write("Sube tu archivo PDF y selecciona las páginas que deseas extraer.")
@@ -127,14 +137,4 @@ else:
                 label="📥 3. Descargar archivo Excel",
                 data=st.session_state.excel_data,
                 file_name=f"Extracto_{start_page}_a_{end_page}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-            
-            st.write("---")
-            
-            if st.button("🔄 Procesar nuevo archivo / Limpiar pantalla"):
-                st.session_state.procesado = False
-                st.session_state.excel_data = None
-                st.session_state.total_filas = 0
-                st.session_state.uploader_key += 1 
-                st.rerun()
+                mime="application/vnd.openxmlformats
