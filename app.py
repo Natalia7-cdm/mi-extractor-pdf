@@ -9,7 +9,7 @@ st.set_page_config(page_title="Extractor de PDF", layout="centered")
 # --- 1. SISTEMA DE LOGIN ---
 # Aquí puedes agregar o quitar los correos y contraseñas de tu equipo
 USUARIOS_PERMITIDOS = {
-    "karina@sintesis.com.bo": "acceso123",
+    "karinao@sintesis.com.bo": "acceso123",
     "nicolf@sintesis.com.bo": "Sintesis2026",
     "manuelm@sintesis.com.bo": "Junio2026"
 }
