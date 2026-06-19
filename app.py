@@ -8,7 +8,7 @@ st.set_page_config(page_title="Extractor de PDF", layout="centered")
 
 # --- EL LOGO SIEMPRE ARRIBA ---
 # Al ponerlo en 900, le quitamos las columnas para que ocupe un buen espacio
-st.image("logo.jpg", width=800) 
+st.image("logo.jpg", width=600) 
 st.write("---") 
 
 # --- 1. SISTEMA DE LOGIN ---
