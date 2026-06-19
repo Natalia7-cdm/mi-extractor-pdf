@@ -77,9 +77,19 @@ else:
 
     col1, col2 = st.columns(2)
     with col1:
-        start_page = st.number_input("Página Inicial", min_value=1, value=1)
+        start_page = st.number_input(
+            "Página Inicial", 
+            min_value=1, 
+            value=None, 
+            placeholder="Ingresar número"
+        )
     with col2:
-        end_page = st.number_input("Página Final", min_value=1, value=1465)
+        end_page = st.number_input(
+            "Página Final", 
+            min_value=1, 
+            value=None, 
+            placeholder="Ingresar número"
+        )
 
     if uploaded_file is not None:
         if not st.session_state.procesado:
