@@ -15,7 +15,7 @@ st.write("---")
 # --- 1. SISTEMA DE LOGIN ---
 # Correos oficiales del equipo. Puedes cambiar "sintesis2026" por sus contraseñas reales.
 USUARIOS_PERMITIDOS = {
-    "karinao@sintesis.com": "acceso123",
+    "karinao@sintesis.com.bo": "acceso123",
     "nicolf@sintesis.com.bo": "Sintesis123",
     "manuelm@sintesis.com.bo": "Junio2026"
 }
