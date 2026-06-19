@@ -6,26 +6,23 @@ import re
 
 st.set_page_config(page_title="Extractor de PDF", layout="centered")
 
+# --- EL LOGO SIEMPRE ARRIBA ---
+# Al ponerlo en 900, le quitamos las columnas para que ocupe un buen espacio
+st.image("logo.jpg", width=900) 
+st.write("---") 
+
 # --- 1. SISTEMA DE LOGIN ---
-# Aquí puedes agregar o quitar los correos y contraseñas de tu equipo
+# Correos oficiales del equipo. Puedes cambiar "sintesis2026" por sus contraseñas reales.
 USUARIOS_PERMITIDOS = {
-    "karinao@sintesis.com.bo": "acceso123",
-    "nicolf@sintesis.com.bo": "Sintesis2026",
+    "karinao@sintesis.com": "acceso123",
+    "nicolf@sintesis.com.bo": "Sintesis123",
     "manuelm@sintesis.com.bo": "Junio2026"
 }
 
-# Inicializamos la memoria del login
 if 'logeado' not in st.session_state:
     st.session_state.logeado = False
 
-# --- EL LOGO ---
-    col_izq, col_centro, col_der = st.columns([1, 2, 1]) # Creamos 3 columnas para centrar
-    with col_centro:
-        # Cambia "logo.png" por el nombre exacto de tu archivo subido
-        st.image("logo.jpg", width=900) 
-    # -------------------------------------
-
-# Si NO está logeado, mostramos solo la pantalla de inicio de sesión
+# Si NO está logeado, mostramos solo el formulario
 if not st.session_state.logeado:
     st.title("🔒 Acceso Restringido")
     st.write("Por favor, inicia sesión con tu correo corporativo.")
@@ -42,19 +39,25 @@ if not st.session_state.logeado:
 
 # --- 2. EL PORTAL (Solo se muestra si el login fue exitoso) ---
 else:
-    # Botón para cerrar sesión en la esquina superior
+    # Botón para cerrar sesión en la esquina superior derecha
     col_vacia, col_salir = st.columns([4, 1])
     with col_salir:
         if st.button("Cerrar Sesión"):
             st.session_state.logeado = False
             st.session_state.procesado = False
             st.session_state.excel_data = None
-            st.rerun()
+            
+            # Forzamos un refresco real del navegador para que el logo vuelva a cargar
+            st.components.v1.html("""
+                <script>
+                    window.parent.location.reload();
+                </script>
+            """, height=0)
+            st.stop()
 
     st.title("Extractor de Extractos Bancarios a Excel 📊")
     st.write("Sube tu archivo PDF y selecciona las páginas que deseas extraer.")
 
-    # Inicializamos la memoria del extractor
     if 'procesado' not in st.session_state:
         st.session_state.procesado = False
         st.session_state.excel_data = None
