@@ -20,9 +20,14 @@ if 'logeado' not in st.session_state:
 # CASO A: SI NO ESTÁ LOGEADO (Muestra el logo GRANDE y CENTRADO en el Login)
 # =========================================================================
 if not st.session_state.logeado:
-    col_izq, col_centro, col_der = st.columns([1, 6, 1]) 
-    with col_centro:
-        st.image("logo.jpg", width=600)
+    # Sistema de seguridad para que la app no colapse si falta el archivo
+    try:
+        col_izq, col_centro, col_der = st.columns([1, 6, 1]) 
+        with col_centro:
+            st.image("logo.jpg", width=600)
+    except:
+        st.warning("⚠️ No se pudo visualizar la imagen 'logo.jpg'. Revisa su nombre en GitHub.")
+        
     st.write("---") 
     
     st.title("🔒 Acceso Restringido")
@@ -44,7 +49,10 @@ if not st.session_state.logeado:
 else:
     col_espacio, col_logo_derecha = st.columns([4, 1])
     with col_logo_derecha:
-        st.image("logo.jpg", width=120)
+        try:
+            st.image("logo.jpg", width=120)
+        except:
+            pass # Si falla aquí adentro, simplemente no muestra nada y no rompe el portal
         
     col_vacia, col_salir = st.columns([4, 1])
     with col_salir:
@@ -94,52 +102,55 @@ else:
     if uploaded_file is not None:
         if not st.session_state.procesado:
             if st.button("2. Procesar y Extraer Datos"):
-                st.info("Procesando el texto de las páginas... ¡No cierres esta ventana!")
-                all_data = []
-                
-                try:
-                    with pdfplumber.open(uploaded_file) as pdf:
-                        total_pages = len(pdf.pages)
-                        
-                        if start_page > total_pages or end_page > total_pages or start_page > end_page:
-                            st.error(f"Error en las páginas. El PDF solo tiene {total_pages} páginas.")
-                        else:
-                            patron = r"^(\d{2}/\d{2}/\d{4})\s+(\S+)\s+(.+?)\s+([\-\d,]+\.\d{2})\s+([\-\d,]+\.\d{2})\s+([\-\d,]+\.\d{2})\s*$"
-                            
-                            for i in range(start_page - 1, end_page):
-                                page = pdf.pages[i]
-                                text = page.extract_text()
-                                
-                                if text:
-                                    lineas = text.split('\n')
-                                    for linea in lineas:
-                                        match = re.match(patron, linea.strip())
-                                        if match:
-                                            all_data.append(list(match.groups()))
+                # Validamos que el usuario haya ingresado números en las cajitas vacías
+                if start_page is None or end_page is None:
+                    st.error("⚠️ Por favor, ingresa los números de página inicial y final antes de continuar.")
+                else:
+                    st.info("Procesando el texto de las páginas... ¡No cierres esta ventana!")
+                    all_data = []
                     
-                    if all_data:
-                        columnas = ["FECHA", "N.DOC", "DESCRIPCION", "DEBE", "HABER", "SALDO"]
-                        df = pd.DataFrame(all_data, columns=columnas)
+                    try:
+                        with pdfplumber.open(uploaded_file) as pdf:
+                            total_pages = len(pdf.pages)
+                            
+                            if start_page > total_pages or end_page > total_pages or start_page > end_page:
+                                st.error(f"Error en las páginas. El PDF solo tiene {total_pages} páginas.")
+                            else:
+                                patron = r"^(\d{2}/\d{2}/\d{4})\s+(\S+)\s+(.+?)\s+([\-\d,]+\.\d{2})\s+([\-\d,]+\.\d{2})\s+([\-\d,]+\.\d{2})\s*$"
+                                
+                                for i in range(start_page - 1, end_page):
+                                    page = pdf.pages[i]
+                                    text = page.extract_text()
+                                    
+                                    if text:
+                                        lineas = text.split('\n')
+                                        for linea in lineas:
+                                            match = re.match(patron, linea.strip())
+                                            if match:
+                                                all_data.append(list(match.groups()))
                         
-                        output = io.BytesIO()
-                        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                            df.to_excel(writer, index=False, sheet_name='Extracto')
-                        
-                        st.session_state.excel_data = output.getvalue()
-                        st.session_state.total_filas = len(df)
-                        st.session_state.procesado = True
-                        st.rerun()
-                        
-                    else:
-                        st.warning("No se encontraron transacciones en estas páginas.")
-                        
-                except Exception as e:
-                    st.error(f"Ocurrió un error: {e}")
+                        if all_data:
+                            columnas = ["FECHA", "N.DOC", "DESCRIPCION", "DEBE", "HABER", "SALDO"]
+                            df = pd.DataFrame(all_data, columns=columnas)
+                            
+                            output = io.BytesIO()
+                            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                                df.to_excel(writer, index=False, sheet_name='Extracto')
+                            
+                            st.session_state.excel_data = output.getvalue()
+                            st.session_state.total_filas = len(df)
+                            st.session_state.procesado = True
+                            st.rerun()
+                            
+                        else:
+                            st.warning("No se encontraron transacciones en estas páginas con el formato esperado.")
+                            
+                    except Exception as e:
+                        st.error(f"Ocurrió un error: {e}")
 
         if st.session_state.procesado:
             st.success(f"¡Éxito! Se extrajeron {st.session_state.total_filas} transacciones listas para Excel.")
             
-            # Aquí acorté el texto largo para evitar que se rompa al copiarlo
             tipo_excel = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             
             st.download_button(
